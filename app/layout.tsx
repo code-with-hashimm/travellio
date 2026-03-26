@@ -8,6 +8,8 @@ export const metadata: Metadata = {
     "We scan 500+ platforms in real-time so you never overpay for flights, hotels or experiences again. Built at TinyFish Hackathon 2025."
 };
 
+import { Analytics } from "@vercel/analytics/react";
+
 export default function RootLayout({
   children
 }: {
@@ -16,7 +18,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-black text-white antialiased">
-        <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <SmoothScrollProvider>
+          {children}
+          <Analytics />
+        </SmoothScrollProvider>
       </body>
     </html>
   );
