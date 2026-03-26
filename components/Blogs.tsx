@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { SectionTag } from "./ui/SectionTag";
 import { teamMembers } from "@/lib/data";
-import { Github, Linkedin } from "lucide-react";
+import { Github, Linkedin, Globe } from "lucide-react";
 
 const badgeColors: Record<string, string> = {
   cyan: "bg-accent-cyan/20 text-accent-cyan",
@@ -77,16 +77,30 @@ export function Blogs() {
               <div className="mt-4 flex justify-center gap-3">
                 <a
                   href={member.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-body/5 text-gray-muted transition-colors hover:bg-gray-body/10 hover:text-gray-body"
                 >
                   <Github className="h-4 w-4" />
                 </a>
                 <a
                   href={member.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-body/5 text-gray-muted transition-colors hover:bg-gray-body/10 hover:text-gray-body"
                 >
                   <Linkedin className="h-4 w-4" />
                 </a>
+                { (member as any).portfolio && (
+                  <a
+                    href={(member as any).portfolio}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-body/5 text-gray-muted transition-colors hover:bg-gray-body/10 hover:text-gray-body"
+                  >
+                    <Globe className="h-4 w-4" />
+                  </a>
+                )}
               </div>
             </motion.article>
           ))}

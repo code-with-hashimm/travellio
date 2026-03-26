@@ -206,8 +206,9 @@ export const teamMembers = [
     badgeColor: "cyan",
     initials: "HA",
     photo: "/member-1.png",
-    github: "#",
-    linkedin: "#"
+    github: "https://github.com/code-with-hashimm",
+    linkedin: "https://www.linkedin.com/in/hashnode",
+    portfolio: "https://hashim-portfolio.in"
   },
   {
     id: "member-2",
@@ -217,8 +218,8 @@ export const teamMembers = [
     badgeColor: "teal",
     initials: "MO",
     photo: "/member-2.png",
-    github: "#",
-    linkedin: "#"
+    github: "https://github.com/mohammedmalvi",
+    linkedin: "https://linkedin.com/in/mohammed-malvi-7a3851311"
   }
 ];
 
