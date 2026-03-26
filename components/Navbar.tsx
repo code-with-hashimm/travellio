@@ -2,10 +2,12 @@
 
 import { motion } from "framer-motion";
 import { Menu } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const navLinks = ["How It Works", "Live Demo", "Tech Stack", "Team"];
 
 export function Navbar() {
+  const router = useRouter();
   return (
     <motion.nav
       initial={{ opacity: 0, y: -40 }}
@@ -39,6 +41,7 @@ export function Navbar() {
           <motion.button
             whileHover={{ y: -2, boxShadow: "0 0 20px rgba(0,212,255,0.4)" }}
             transition={{ type: "spring", stiffness: 400 }}
+            onClick={() => router.push('/search')}
             className="inline-flex items-center justify-center rounded-pill bg-accent-cyan px-5 py-2 text-xs font-semibold text-black"
           >
             Try Demo →

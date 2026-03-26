@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { SectionTag } from "./ui/SectionTag";
+import { useRouter } from "next/navigation";
 
 const demoDeals = [
   {
@@ -43,6 +44,7 @@ const scanPlatforms = [
 const searchText = "Mumbai → Dubai, 20 Mar";
 
 export function LiveDemoPreview({ demoUrl }: { demoUrl?: string }) {
+  const router = useRouter();
   const [phase, setPhase] = useState(0);
   const [typedText, setTypedText] = useState("");
   const [scanIndex, setScanIndex] = useState(0);
@@ -152,6 +154,7 @@ export function LiveDemoPreview({ demoUrl }: { demoUrl?: string }) {
                 )}
               </div>
               <button
+                onClick={() => router.push('/search')}
                 className={`rounded-lg px-4 py-2.5 font-mono text-xs font-semibold transition-all ${
                   phase === 0
                     ? "animate-pulse bg-accent-cyan text-black"

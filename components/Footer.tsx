@@ -1,6 +1,7 @@
-"use client";
+import { useRouter } from "next/navigation";
 
 export function Footer() {
+  const router = useRouter();
   return (
     <footer className="border-t border-white/[0.08] bg-surface-dark text-white">
       <div className="mx-auto max-w-[900px] px-6 py-16 md:px-10">
@@ -25,10 +26,10 @@ export function Footer() {
               Product
             </h4>
             <ul className="space-y-2 text-white/60">
-              <li className="cursor-pointer transition-colors hover:text-white hover:underline underline-offset-2">How It Works</li>
-              <li className="cursor-pointer transition-colors hover:text-white hover:underline underline-offset-2">Live Demo</li>
-              <li className="cursor-pointer transition-colors hover:text-white hover:underline underline-offset-2">Features</li>
-              <li className="cursor-pointer transition-colors hover:text-white hover:underline underline-offset-2">Roadmap</li>
+              <li onClick={() => router.push('/search')} className="cursor-pointer transition-colors hover:text-white hover:underline underline-offset-2">How It Works</li>
+              <li onClick={() => router.push('/search')} className="cursor-pointer transition-colors hover:text-white hover:underline underline-offset-2">Live Demo</li>
+              <li onClick={() => router.push('/search')} className="cursor-pointer transition-colors hover:text-white hover:underline underline-offset-2">Features</li>
+              <li onClick={() => router.push('/search')} className="cursor-pointer transition-colors hover:text-white hover:underline underline-offset-2">Roadmap</li>
             </ul>
           </div>
           <div>

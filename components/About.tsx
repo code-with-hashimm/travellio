@@ -6,8 +6,10 @@ import { Compass } from "lucide-react";
 import { SectionTag } from "./ui/SectionTag";
 import { Button } from "./ui/Button";
 import { aboutImage } from "@/lib/data";
+import { useRouter } from "next/navigation";
 
 export function About() {
+  const router = useRouter();
   return (
     <section
       id="about"
@@ -35,7 +37,11 @@ export function About() {
             cheaper the next day. Travel Deal Hunter uses AI to scan 500+
             platforms in real-time so that never happens again.
           </p>
-          <Button variant="secondary" className="mt-2 px-7 py-3 text-sm">
+          <Button 
+            onClick={() => router.push('/search')}
+            variant="secondary" 
+            className="mt-2 px-7 py-3 text-sm"
+          >
             See How It Works
           </Button>
         </motion.div>

@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useState, useCallback, useRef, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import type { SearchTab } from "@/lib/searchTypes";
 import {
   AirplaneTakeoff,
@@ -492,6 +493,27 @@ function HotelForm({ onSearch, isLoading, isAnyAgentRunning, error, formValues, 
 
 export function SearchForm(props: SearchFormProps) {
   const { activeTab, ...rest } = props;
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleSearchWrapper = () => {
+    if (pathname !== '/search') {
+      const params = new URLSearchParams({
+        type: activeTab,
+        from: props.formValues.from || "",
+        to: props.formValues.to || "",
+        date: props.formValues.date || "",
+        adults: props.formValues.adults || "1",
+        cabinClass: props.formValues.cabinClass || "Economy",
+      });
+      router.push(`/search?${params.toString()}`);
+    } else {
+      props.onSearch();
+    }
+  };
+
+  const restWithWrapper = { ...rest, onSearch: handleSearchWrapper };
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -501,10 +523,10 @@ export function SearchForm(props: SearchFormProps) {
         exit={{ opacity: 0, x: -10 }}
         transition={{ duration: 0.25, ease }}
       >
-        {activeTab === "flights" && <FlightForm {...rest} />}
-        {activeTab === "trains" && <TrainForm {...rest} />}
-        {activeTab === "buses" && <BusForm {...rest} />}
-        {activeTab === "hotels" && <HotelForm {...rest} />}
+        {activeTab === "flights" && <FlightForm {...restWithWrapper} />}
+        {activeTab === "trains" && <TrainForm {...restWithWrapper} />}
+        {activeTab === "buses" && <BusForm {...restWithWrapper} />}
+        {activeTab === "hotels" && <HotelForm {...restWithWrapper} />}
       </motion.div>
     </AnimatePresence>
   );

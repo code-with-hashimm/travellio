@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Button } from "./ui/Button";
 import { heroVideo } from "@/lib/data";
+import { useRouter } from "next/navigation";
 
 const heroWords = "Find the Best Travel Deals with AI.".split(" ");
 
@@ -12,6 +13,7 @@ const wordVariants = {
 };
 
 export function Hero() {
+  const router = useRouter();
   return (
     <section className="noise-overlay relative flex min-h-screen items-center justify-center overflow-hidden bg-black">
       <div className="pointer-events-none absolute inset-0">
@@ -94,10 +96,17 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 1.2, ease: [0.12, 0.23, 0.5, 1] }}
           className="mt-8 flex gap-4 gooey-filter"
         >
-          <Button className="px-8 py-3 text-sm font-semibold">
+          <Button 
+            onClick={() => router.push('/search')}
+            className="px-8 py-3 text-sm font-semibold"
+          >
             Hunt a Deal →
           </Button>
-          <Button variant="ghost" className="px-8 py-3 text-sm font-semibold">
+          <Button 
+            onClick={() => router.push('/search')}
+            variant="ghost" 
+            className="px-8 py-3 text-sm font-semibold"
+          >
             Watch Demo
           </Button>
         </motion.div>

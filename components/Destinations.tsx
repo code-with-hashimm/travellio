@@ -6,8 +6,10 @@ import { useState, useEffect } from "react";
 import { SectionTag } from "./ui/SectionTag";
 import { destinationBackgrounds } from "@/lib/data";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function Destinations() {
+  const router = useRouter();
   const [current, setCurrent] = useState(0);
   const total = destinationBackgrounds.length;
 
@@ -78,7 +80,10 @@ export function Destinations() {
                   <p className="mt-2 font-mono text-xl font-bold text-accent-cyan md:text-2xl">
                     {dest.title}
                   </p>
-                  <button className="mt-4 inline-flex items-center gap-2 rounded-pill bg-accent-cyan px-6 py-2.5 text-sm font-semibold text-black transition-shadow hover:shadow-cyan-glow">
+                  <button 
+                    onClick={() => router.push(`/search?to=${encodeURIComponent(dest.name)}`)}
+                    className="mt-4 inline-flex items-center gap-2 rounded-pill bg-accent-cyan px-6 py-2.5 text-sm font-semibold text-black transition-shadow hover:shadow-cyan-glow"
+                  >
                     Hunt This Deal
                     <ArrowRight className="h-4 w-4" />
                   </button>
