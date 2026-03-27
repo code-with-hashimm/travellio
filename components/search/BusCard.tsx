@@ -45,7 +45,14 @@ export function BusCard({ bus, index, context = {}, isCheapest }: BusCardProps) 
         {/* Left — operator and times */}
         <div className="flex-1 space-y-3">
           <div className="flex items-center gap-3">
-            <h3 className="font-display text-base text-[#0a0a0a]">{bus.operatorName}</h3>
+            <h3 className="font-display text-base text-[#0a0a0a]">
+              {bus.operatorName}
+              {bus.source && (
+                <span className="ml-2 inline-flex items-center rounded-md bg-[#f3f4f6] px-1.5 py-0.5 text-[9px] font-bold text-[#4b5563] ring-1 ring-inset ring-gray-500/10 whitespace-nowrap">
+                  {bus.source}
+                </span>
+              )}
+            </h3>
             <span className="text-xs text-[#6b7280]">{bus.busType}</span>
             {(bus as any).isBestPrice && (
               <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-0.5 text-[11px] font-bold text-orange-600 ring-1 ring-orange-400/40">

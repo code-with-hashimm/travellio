@@ -87,6 +87,11 @@ export function FlightCard({ flight, index, context = {}, isCheapest }: FlightCa
         <div className="hidden shrink-0 flex-col items-center gap-1 md:flex">
           <AirlineAvatar code={flight.airlineLogo} name={flight.airline} />
           <span className="text-[11px] text-[#6b7280]">{flight.airline}</span>
+          {flight.source && (
+            <span className="mt-1 inline-flex items-center rounded-md bg-[#f3f4f6] px-1.5 py-0.5 text-[9px] font-bold text-[#4b5563] ring-1 ring-inset ring-gray-500/10 whitespace-nowrap">
+              {flight.source}
+            </span>
+          )}
           {(flight as any).isBestPrice && (
             <span className="mt-0.5 inline-flex items-center gap-0.5 rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-bold text-orange-600 ring-1 ring-orange-400/40">
               🔥 Best

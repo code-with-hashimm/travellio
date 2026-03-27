@@ -49,6 +49,11 @@ export function TrainCard({ train, index, isCheapest }: TrainCardProps) {
         <div>
           <h3 className="font-display text-base text-[#0a0a0a]">
             {train.trainName}
+            {train.source && (
+              <span className="ml-2 inline-flex items-center rounded-md bg-[#f3f4f6] px-1.5 py-0.5 text-[9px] font-bold text-[#4b5563] ring-1 ring-inset ring-gray-500/10 whitespace-nowrap">
+                {train.source}
+              </span>
+            )}
           </h3>
           <span className="font-mono text-xs text-[#6b7280]">#{train.trainNumber}</span>
         </div>

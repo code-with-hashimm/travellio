@@ -6,6 +6,7 @@ interface Props {
   elapsedMs: number;
   sourcesCount: number;
   dealsFound: number;
+  status?: string;
 }
 
 export function AgentProgress({
@@ -13,7 +14,8 @@ export function AgentProgress({
   statusMsg,
   elapsedMs,
   sourcesCount,
-  dealsFound
+  dealsFound,
+  status = "streaming"
 }: Props) {
   const pct = Math.min(Math.max(progressPct, 0), 100);
 
@@ -49,6 +51,22 @@ export function AgentProgress({
           </motion.p>
         </AnimatePresence>
       </div>
+
+      {/* Urgency Warning */}
+      <AnimatePresence>
+        {elapsedMs > 15000 && status === "streaming" && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-6 overflow-hidden"
+          >
+            <p className="text-[11px] font-medium text-amber-400/90 bg-amber-400/10 border border-amber-400/20 px-3 py-1.5 rounded-lg inline-block">
+              ⚠️ This site is taking longer than usual. Hang tight or try again.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Stats Row */}
       <div className="grid grid-cols-3 divide-x divide-white/[0.05] rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 backdrop-blur-sm">

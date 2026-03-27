@@ -113,6 +113,7 @@ export function AgentPanel({
               elapsedMs={elapsedMs}
               sourcesCount={sourcesCount}
               dealsFound={dealsFound}
+              status={status}
             />
           )}
 

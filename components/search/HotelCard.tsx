@@ -74,7 +74,14 @@ export function HotelCard({ hotel, index, context = {}, isCheapest }: HotelCardP
         <div>
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="font-display text-base text-[#0a0a0a]">{hotel.name}</h3>
+              <h3 className="font-display text-base text-[#0a0a0a]">
+                {hotel.name}
+                {hotel.source && (
+                  <span className="ml-2 inline-flex items-center rounded-md bg-[#f3f4f6] px-1.5 py-0.5 text-[9px] font-bold text-[#4b5563] ring-1 ring-inset ring-gray-500/10 whitespace-nowrap">
+                    {hotel.source}
+                  </span>
+                )}
+              </h3>
               <div className="mt-1 flex items-center gap-1">
                 {Array.from({ length: hotel.stars }).map((_, i) => (
                   <Star key={i} size={12} weight="fill" className="text-[#f59e0b]" />

@@ -58,12 +58,21 @@ export function useAgentStream(): AgentStreamState {
   const timerRef    = useRef<NodeJS.Timeout | null>(null)
   const startTimeRef= useRef<number>(0)
   const timeoutRef  = useRef<NodeJS.Timeout | null>(null)
+  const hasStreamRef = useRef<boolean>(false)
 
-  // Elapsed time ticker
+  // Elapsed time ticker & Dynamic Status Messages
   useEffect(() => {
     if (status === 'started' || status === 'streaming') {
       timerRef.current = setInterval(() => {
-        setElapsedMs(Date.now() - startTimeRef.current)
+        const elapsed = Date.now() - startTimeRef.current
+        setElapsedMs(elapsed)
+        
+        // Time-based status messages
+        if (elapsed < 5000) setStatusMsg('Launching browser...')
+        else if (elapsed < 10000) setStatusMsg('Loading travel site...')
+        else if (elapsed < 15000) setStatusMsg('Searching for deals...')
+        else if (elapsed < 20000) setStatusMsg('Comparing prices...')
+        else setStatusMsg('Almost done, finalising results...')
       }, 1000)
     } else {
       if (timerRef.current) clearInterval(timerRef.current)
@@ -116,6 +125,16 @@ export function useAgentStream(): AgentStreamState {
     setActiveStreamId(null)
     setAgents([])
     setResult(null)
+    hasStreamRef.current = false
+
+    // 20s Smart Timeout: If no STREAMING_URL is received, abort
+    timeoutRef.current = setTimeout(() => {
+      if (!hasStreamRef.current && (status === 'started' || status === 'streaming')) {
+        stopStream()
+        setError('Search timed out. Try a different route.')
+        setStatus('error')
+      }
+    }, 20000)
 
     try {
       // 1. Initiate parallel runs via our refactored async route
@@ -168,6 +187,7 @@ export function useAgentStream(): AgentStreamState {
             
             // Update live preview URL if available
             if (data.streaming_url) {
+              hasStreamRef.current = true
               setStreams(prev => ({ ...prev, [runId]: data.streaming_url }))
               setActiveStreamId(prev => prev || runId)
             }

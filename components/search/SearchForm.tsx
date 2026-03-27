@@ -18,8 +18,15 @@ import {
   Minus,
   Plus,
   MapPin,
-  SlidersHorizontal
+  SlidersHorizontal,
+  MapPin as MapPinIcon
 } from "@phosphor-icons/react";
+
+const LOCATIONS = [
+  "Mumbai (BOM)", "Delhi (DEL)", "Ahmedabad (AMD)", "Bangalore (BLR)", "Pune (PNQ)", "Hyderabad (HYD)", "Chennai (MAA)", "Kolkata (CCU)", "Goa (GOI)", "Jaipur (JAI)", "Agra (AGR)", "Varanasi (VNS)", "Kochi (COK)", "Trivandrum (TRV)", "Coimbatore (CJB)", "Indore (IDR)", "Lucknow (LKO)", "Amritsar (ATQ)", "Chandigarh (IXC)", "Nagpur (NAG)", "Aurangabad (IXU)", "Nashik (ISK)", "Kolhapur (KLH)", "Solapur (SSE)", "Jalgaon (JL", "Nanded (NDC)", "Tokyo (NRT)", "Seoul (ICN)", "Bangkok (BKK)", "Singapore (SIN)", "Hong Kong (HKG)", "Shanghai (PVG)", "Beijing (PEK)", "Manila (MNL)", "Jakarta (CGK)", "Kuala Lumpur (KUL)", "Dubai (DXB)", "Doha (DOH)", "Riyadh (RUH)", "Istanbul (IST)", "London (LHR)", "Paris (CDG)", "Amsterdam (AMS)", "Frankfurt (FRA)", "Madrid (MAD)", "Barcelona (BCN)", "Rome (FCO)", "Milan (MXP)", "Athens (ATH)", "Berlin (BER)", "Moscow (SVO)", "Dublin (DUB)", "Zurich (ZRH)", "Vienna (VIE)", "Copenhagen (CPH)", "Helsinki (HEL)", "Lisbon (LIS)", "Porto (OPO)", "Brussels (BRU)", "Prague (PRG)", "Budapest (BUD)", "Warsaw (WAW)", "New York (JFK)", "Los Angeles (LAX)", "Chicago (ORD)", "Miami (MIA)", "Las Vegas (LAS)", "San Francisco (SFO)", "Toronto (YYZ)", "Vancouver (YVR)", "Mexico City (MEX)", "Cancun (CUN)", "Atlanta (ATL)", "Dallas (DFW)", "Denver (DEN)", "Houston (IAH)", "Boston (BOS)", "Washington (IAD)", "Sao Paulo (GRU)", "Rio de Janeiro (GIG)", "Buenos Aires (EZE)", "Bogota (BOG)", "Lima (LIM)", "Santiago (SCL)", "Johannesburg (JNB)", "Cape Town (CPT)", "Cairo (CAI)", "Lagos (LOS)", "Nairobi (NBO)", "Addis Ababa (ADD)", "Casablanca (CMN)", "Marrakech (RAK)", "Sydney (SYD)", "Melbourne (MEL)", "Brisbane (BNE)", "Auckland (AKL)", "Perth (PER)"
+
+
+];
 
 type SearchFormProps = {
   activeTab: SearchTab;
@@ -60,19 +67,19 @@ function FormField({
     position === "first"
       ? "md:rounded-l-xl md:rounded-r-none"
       : position === "last"
-      ? "md:rounded-r-xl md:rounded-l-none"
-      : position === "only"
-      ? "rounded-xl"
-      : "md:rounded-none";
+        ? "md:rounded-r-xl md:rounded-l-none"
+        : position === "only"
+          ? "rounded-xl"
+          : "md:rounded-none";
 
   const border =
     position === "first"
       ? "md:border-r-0"
       : position === "last"
-      ? "md:border-l-0"
-      : position === "middle"
-      ? "md:border-x-0"
-      : "";
+        ? "md:border-l-0"
+        : position === "middle"
+          ? "md:border-x-0"
+          : "";
 
   return (
     <div
@@ -87,6 +94,119 @@ function FormField({
         readOnly={readOnly}
         className="h-full w-full bg-transparent text-sm text-white placeholder-white/40 outline-none"
       />
+    </div>
+  );
+}
+
+/* ────────── Location Input with Auto-complete ────────── */
+function LocationInput({
+  icon,
+  placeholder,
+  value,
+  onChange,
+  position = "middle"
+}: {
+  icon: React.ReactNode;
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  position?: "first" | "middle" | "last" | "only";
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [filtered, setFiltered] = useState<string[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const radius =
+    position === "first"
+      ? "md:rounded-l-xl md:rounded-r-none"
+      : position === "last"
+        ? "md:rounded-r-xl md:rounded-l-none"
+        : position === "only"
+          ? "rounded-xl"
+          : "md:rounded-none";
+
+  const border =
+    position === "first"
+      ? "md:border-r-0"
+      : position === "last"
+        ? "md:border-l-0"
+        : position === "middle"
+          ? "md:border-x-0"
+          : "";
+
+  useEffect(() => {
+    if (value.length > 0) {
+      const matches = LOCATIONS.filter(loc =>
+        loc.toLowerCase().includes(value.toLowerCase())
+      ).slice(0, 8);
+      setFiltered(matches);
+      setIsOpen(matches.length > 0 && document.activeElement === inputRef.current);
+    } else {
+      setFiltered([]);
+      setIsOpen(false);
+    }
+  }, [value]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isOpen) return;
+    if (e.key === "ArrowDown") {
+      setSelectedIndex(prev => (prev + 1) % filtered.length);
+    } else if (e.key === "ArrowUp") {
+      setSelectedIndex(prev => (prev - 1 + filtered.length) % filtered.length);
+    } else if (e.key === "Enter" && selectedIndex >= 0) {
+      onChange(filtered[selectedIndex]);
+      setIsOpen(false);
+    } else if (e.key === "Escape") {
+      setIsOpen(false);
+    }
+  };
+
+  return (
+    <div className="relative flex-1">
+      <div
+        className={`group flex h-[56px] items-center gap-3 rounded-xl border border-white/[0.12] bg-white/[0.07] px-4 transition-colors focus-within:border-accent-cyan focus-within:shadow-[0_0_0_2px_rgba(0,212,255,0.15)] ${radius} ${border}`}
+      >
+        <span className="shrink-0 text-accent-cyan">{icon}</span>
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => value.length > 0 && filtered.length > 0 && setIsOpen(true)}
+          onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="h-full w-full bg-transparent text-sm text-white placeholder-white/40 outline-none"
+        />
+      </div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            className="absolute left-0 right-0 top-[62px] z-[100] overflow-hidden rounded-xl border border-white/10 bg-surface-dark shadow-2xl"
+          >
+            {filtered.map((loc, i) => (
+              <button
+                key={loc}
+                onClick={() => {
+                  onChange(loc);
+                  setIsOpen(false);
+                }}
+                className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors ${selectedIndex === i ? "bg-white/10 text-accent-cyan" : "text-white/80 hover:bg-white/5 hover:text-white"
+                  }`}
+              >
+                <MapPinIcon size={16} weight="duotone" className="text-accent-cyan/60" />
+                <span className="text-sm font-medium">{loc}</span>
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -109,14 +229,14 @@ function DateField({
     position === "first"
       ? "md:rounded-l-xl md:rounded-r-none"
       : position === "last"
-      ? "md:rounded-r-xl md:rounded-l-none"
-      : "md:rounded-none";
+        ? "md:rounded-r-xl md:rounded-l-none"
+        : "md:rounded-none";
   const border =
     position === "first"
       ? "md:border-r-0"
       : position === "last"
-      ? "md:border-l-0"
-      : "md:border-x-0";
+        ? "md:border-l-0"
+        : "md:border-x-0";
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -196,7 +316,7 @@ function TravellerField({
   const isTrain = activeTab === 'trains';
   const isBus = activeTab === 'buses';
   const isHotel = activeTab === 'hotels';
-  
+
   const label = isHotel
     ? `${formValues.cabinClass}` // 1 Guest, 2 Guests etc
     : isTrain || isBus
@@ -207,14 +327,14 @@ function TravellerField({
     position === "first"
       ? "md:rounded-l-xl md:rounded-r-none"
       : position === "last"
-      ? "md:rounded-r-xl md:rounded-l-none"
-      : "md:rounded-none";
+        ? "md:rounded-r-xl md:rounded-l-none"
+        : "md:rounded-none";
   const border =
     position === "first"
       ? "md:border-r-0"
       : position === "last"
-      ? "md:border-l-0"
-      : "md:border-x-0";
+        ? "md:border-l-0"
+        : "md:border-x-0";
 
   const Counter = ({
     label: cLabel,
@@ -262,7 +382,7 @@ function TravellerField({
         className={`group flex h-[56px] w-full items-center gap-3 rounded-xl border border-white/[0.12] bg-white/[0.07] px-4 text-left transition-colors focus:border-accent-cyan focus:shadow-[0_0_0_2px_rgba(0,212,255,0.15)] ${radius} ${border}`}
       >
         <span className="shrink-0 text-accent-cyan">
-          { (isTrain || isBus) ? (
+          {(isTrain || isBus) ? (
             <SlidersHorizontal size={18} weight="duotone" />
           ) : (
             <UserCircle size={18} weight="duotone" />
@@ -289,27 +409,26 @@ function TravellerField({
                 {isTrain || isBus ? "Class" : isHotel ? "Guests" : "Cabin Class"}
               </p>
               <div className="flex flex-wrap gap-2">
-                {(isTrain 
-                  ? ["SL", "3A", "2A", "1A"] 
+                {(isTrain
+                  ? ["SL", "3A", "2A", "1A"]
                   : isBus
-                  ? ["AC Sleeper", "AC Seater", "Non-AC Sleeper", "Non-AC Seater"]
-                  : isHotel
-                  ? ["1 Guest", "2 Guests", "Family Room"]
-                  : ["Economy", "Premium Economy", "Business", "First Class"]
+                    ? ["AC Sleeper", "AC Seater", "Non-AC Sleeper", "Non-AC Seater"]
+                    : isHotel
+                      ? ["1 Guest", "2 Guests", "Family Room"]
+                      : ["Economy", "Premium Economy", "Business", "First Class"]
                 ).map((c) => (
                   <button
                     key={c}
                     onClick={() => setCabinClass(c)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                      cabinClass === c
-                        ? "bg-teal text-white"
-                        : "bg-[#f3f4f6] text-[#374151] hover:bg-[#e5e7eb]"
-                    }`}
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${cabinClass === c
+                      ? "bg-teal text-white"
+                      : "bg-[#f3f4f6] text-[#374151] hover:bg-[#e5e7eb]"
+                      }`}
                   >
-                    {c === "SL" ? "Sleeper (SL)" : 
-                     c === "3A" ? "3rd AC (3A)" :
-                     c === "2A" ? "2nd AC (2A)" :
-                     c === "1A" ? "1st AC (1A)" : c}
+                    {c === "SL" ? "Sleeper (SL)" :
+                      c === "3A" ? "3rd AC (3A)" :
+                        c === "2A" ? "2nd AC (2A)" :
+                          c === "1A" ? "1st AC (1A)" : c}
                   </button>
                 ))}
               </div>
@@ -329,17 +448,17 @@ function TravellerField({
 }
 
 /* ────────── Hunt Button ────────── */
-function HuntButton({ 
-  onSearch, 
-  isLoading, 
+function HuntButton({
+  onSearch,
+  isLoading,
   isAnyAgentRunning,
   error,
   formValues
-}: { 
-  onSearch: () => void; 
-  isLoading: boolean; 
+}: {
+  onSearch: () => void;
+  isLoading: boolean;
   isAnyAgentRunning: boolean;
-  error?: string | null; 
+  error?: string | null;
   formValues: SearchFormProps["formValues"];
 }) {
   const [cooldown, setCooldown] = useState(0);
@@ -407,9 +526,7 @@ function FlightForm({ onSearch, isLoading, isAnyAgentRunning, error, formValues,
 
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-0">
-      <div className="flex-1">
-        <FormField icon={<AirplaneTakeoff size={18} weight="duotone" />} placeholder="Your Location" value={formValues.from} onChange={(v) => onFormChange((prev: any) => ({ ...prev, from: v }))} position="first" />
-      </div>
+      <LocationInput icon={<AirplaneTakeoff size={18} weight="duotone" />} placeholder="Your Location" value={formValues.from} onChange={(v) => onFormChange((prev: any) => ({ ...prev, from: v }))} position="first" />
       <motion.button
         onClick={handleSwap}
         style={{ rotate: rotateZ }}
@@ -417,9 +534,7 @@ function FlightForm({ onSearch, isLoading, isAnyAgentRunning, error, formValues,
       >
         <ArrowsClockwise size={16} weight="bold" />
       </motion.button>
-      <div className="flex-1">
-        <FormField icon={<AirplaneLanding size={18} weight="duotone" />} placeholder="Country or Airport" value={formValues.to} onChange={(v) => onFormChange((prev: any) => ({ ...prev, to: v }))} position="middle" />
-      </div>
+      <LocationInput icon={<AirplaneLanding size={18} weight="duotone" />} placeholder="Country or Airport" value={formValues.to} onChange={(v) => onFormChange((prev: any) => ({ ...prev, to: v }))} position="middle" />
       <div className="flex-1">
         <DateField value={formValues.date} onChange={(v) => onFormChange((prev: any) => ({ ...prev, date: v }))} position="middle" placeholder="Departure date" />
       </div>
@@ -434,12 +549,8 @@ function FlightForm({ onSearch, isLoading, isAnyAgentRunning, error, formValues,
 function TrainForm({ onSearch, isLoading, isAnyAgentRunning, error, formValues, onFormChange }: Omit<SearchFormProps, 'activeTab'>) {
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-0">
-      <div className="flex-1">
-        <FormField icon={<TrainSimple size={18} weight="duotone" />} placeholder="Your Location" value={formValues.from} onChange={(v) => onFormChange((prev: any) => ({ ...prev, from: v }))} position="first" />
-      </div>
-      <div className="flex-1">
-        <FormField icon={<TrainSimple size={18} weight="duotone" />} placeholder="Country or Station" value={formValues.to} onChange={(v) => onFormChange((prev: any) => ({ ...prev, to: v }))} position="middle" />
-      </div>
+      <LocationInput icon={<TrainSimple size={18} weight="duotone" />} placeholder="Your Location" value={formValues.from} onChange={(v: string) => onFormChange((prev: any) => ({ ...prev, from: v }))} position="first" />
+      <LocationInput icon={<TrainSimple size={18} weight="duotone" />} placeholder="Country or Station" value={formValues.to} onChange={(v: string) => onFormChange((prev: any) => ({ ...prev, to: v }))} position="middle" />
       <div className="flex-1">
         <DateField value={formValues.date} onChange={(v) => onFormChange((prev: any) => ({ ...prev, date: v }))} position="middle" placeholder="Travel date" />
       </div>
@@ -454,12 +565,8 @@ function TrainForm({ onSearch, isLoading, isAnyAgentRunning, error, formValues, 
 function BusForm({ onSearch, isLoading, isAnyAgentRunning, error, formValues, onFormChange }: Omit<SearchFormProps, 'activeTab'>) {
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-0">
-      <div className="flex-1">
-        <FormField icon={<BusIcon size={18} weight="duotone" />} placeholder="Your Location" value={formValues.from} onChange={(v) => onFormChange((prev: any) => ({ ...prev, from: v }))} position="first" />
-      </div>
-      <div className="flex-1">
-        <FormField icon={<BusIcon size={18} weight="duotone" />} placeholder="Country or City" value={formValues.to} onChange={(v) => onFormChange((prev: any) => ({ ...prev, to: v }))} position="middle" />
-      </div>
+      <LocationInput icon={<BusIcon size={18} weight="duotone" />} placeholder="Your Location" value={formValues.from} onChange={(v: string) => onFormChange((prev: any) => ({ ...prev, from: v }))} position="first" />
+      <LocationInput icon={<BusIcon size={18} weight="duotone" />} placeholder="Country or City" value={formValues.to} onChange={(v: string) => onFormChange((prev: any) => ({ ...prev, to: v }))} position="middle" />
       <div className="flex-1">
         <DateField value={formValues.date} onChange={(v) => onFormChange((prev: any) => ({ ...prev, date: v }))} position="middle" placeholder="Travel date" />
       </div>
@@ -474,9 +581,7 @@ function BusForm({ onSearch, isLoading, isAnyAgentRunning, error, formValues, on
 function HotelForm({ onSearch, isLoading, isAnyAgentRunning, error, formValues, onFormChange }: Omit<SearchFormProps, 'activeTab'>) {
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-0">
-      <div className="flex-[1.5]">
-        <FormField icon={<Bed size={18} weight="duotone" />} placeholder="Country or Property" value={formValues.to} onChange={(v) => onFormChange((prev: any) => ({ ...prev, to: v }))} position="first" />
-      </div>
+      <LocationInput icon={<Bed size={18} weight="duotone" />} placeholder="Country or Property" value={formValues.to} onChange={(v: string) => onFormChange((prev: any) => ({ ...prev, to: v }))} position="first" />
       <div className="flex-1">
         <DateField value={formValues.from} onChange={(v) => onFormChange((prev: any) => ({ ...prev, from: v }))} position="middle" placeholder="Check-in" />
       </div>

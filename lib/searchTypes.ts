@@ -41,6 +41,7 @@ export interface FlightResult {
   fees: number;
   priceHistory: number[];
   displayPrice?: string;
+  source?: string;
 }
 
 // ─── Train Types ────────────────────────
@@ -67,6 +68,7 @@ export interface TrainResult {
   dayChange: number;
   classes: TrainClassInfo[];
   bookingUrl: string;
+  source?: string;
 }
 
 // ─── Bus Types ──────────────────────────
@@ -87,6 +89,7 @@ export interface BusResult {
   savings: number;
   seatsLeft: number;
   displayPrice?: string;
+  source?: string;
 }
 
 // ─── Hotel Types ────────────────────────
@@ -104,6 +107,7 @@ export interface HotelResult {
   savings: number;
   freeCancellation: boolean;
   displayPrice?: string;
+  source?: string;
 }
 
 // ─── Filter Types ───────────────────────

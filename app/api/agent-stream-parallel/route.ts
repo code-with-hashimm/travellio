@@ -12,24 +12,24 @@
 import { NextRequest } from 'next/server'
 import { SITE_CONFIG, buildSelectorHints, getSiteConfig } from '@/lib/siteConfig'
 
-export const runtime    = 'nodejs'
-export const maxDuration = 60
+export const runtime = 'nodejs'
+export const maxDuration = 30
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface SearchParams {
-  type      : string
-  from      : string
-  to        : string
-  date      : string
-  adults    : string
+  type: string
+  from: string
+  to: string
+  date: string
+  adults: string
   cabinClass: string
 }
 
 interface TaskTarget {
-  label : string   // e.g. "Google Flights"
-  url   : string   // deep-link start URL
-  goal  : string   // full goal string with selector hints
+  label: string   // e.g. "Google Flights"
+  url: string   // deep-link start URL
+  goal: string   // full goal string with selector hints
 }
 
 // ─── Handler ─────────────────────────────────────────────────────────────────
@@ -38,17 +38,17 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json()
   const params: SearchParams = {
-    type      : body.type       || 'flights',
-    from      : body.from       || '',
-    to        : body.to         || '',
-    date      : body.date       || '',
-    adults    : body.adults     || '1',
+    type: body.type || 'flights',
+    from: body.from || '',
+    to: body.to || '',
+    date: body.date || '',
+    adults: body.adults || '1',
     cabinClass: body.cabinClass || 'economy',
   }
 
   const missing: string[] = []
   if (!params.from) missing.push('from')
-  if (!params.to)   missing.push('to')
+  if (!params.to) missing.push('to')
   if (!params.date) missing.push('date')
 
   if (missing.length > 0) {
@@ -71,9 +71,9 @@ export async function POST(request: NextRequest) {
   const runTasks = targets.map(async (target) => {
     try {
       const res = await fetch(`${process.env.TINYFISH_BASE_URL}/automation/run-async`, {
-        method : 'POST',
+        method: 'POST',
         headers: {
-          'X-API-Key'   : process.env.TINYFISH_API_KEY!,
+          'X-API-Key': process.env.TINYFISH_API_KEY!,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ url: target.url, goal: target.goal }),
@@ -116,10 +116,10 @@ export async function POST(request: NextRequest) {
  */
 function buildTargets(p: SearchParams): TaskTarget[] {
   const dlParams = {
-    origin    : p.from,
-    dest      : p.to,
-    date1     : p.date,
-    adults    : p.adults,
+    origin: p.from,
+    dest: p.to,
+    date1: p.date,
+    adults: p.adults,
     cabinClass: p.cabinClass,
   }
 
@@ -127,71 +127,74 @@ function buildTargets(p: SearchParams): TaskTarget[] {
 
     case 'flights': {
       const sites = [
-        { key: 'google.com',       label: 'Google Flights' },
-        { key: 'skyscanner.com',   label: 'Skyscanner'     },
-        { key: 'makemytrip.com',   label: 'MakeMyTrip'     },
+        { key: 'kayak.co.in', label: 'Kayak' }, // Bot-friendly
+        { key: 'google.com', label: 'Google Flights' },
+        { key: 'skyscanner.com', label: 'Skyscanner' },
       ]
       return sites.map(({ key, label }) => {
         const profile = SITE_CONFIG[key]
-        if (!profile) return null
-        const url  = profile.deepLink(dlParams)
-        const goal = buildFlightGoal(p) + buildSelectorHints(profile)
+        // If no profile, use Kayak structure for bot-friendliness
+        const url = profile
+          ? profile.deepLink(dlParams)
+          : `https://www.kayak.co.in/flights/${encodeURIComponent(p.from)}-${encodeURIComponent(p.to)}/${p.date}`
+        const goal = buildFlightGoal(p) + (profile ? buildSelectorHints(profile) : '')
         return { label, url, goal }
-      }).filter(Boolean) as TaskTarget[]
+      }).slice(0, 3) as TaskTarget[] // Keep it to 3 main ones
     }
 
     case 'buses': {
-      // Hunt both redBus AND AbhiBus, combine, sort cheapest first
-      const rbProfile = SITE_CONFIG['redbus.in']
       const targets: TaskTarget[] = []
+      // Primary: AbhiBus (Bot-friendly)
+      targets.push({
+        label: 'AbhiBus',
+        url: `https://www.abhibus.com/bus_search/${encodeURIComponent(p.from)}/${encodeURIComponent(p.to)}/${p.date}/1/S`,
+        goal: buildBusGoal(p),
+      })
+      // Secondary: redBus
+      const rbProfile = SITE_CONFIG['redbus.in']
       if (rbProfile) {
         targets.push({
           label: 'redBus',
-          url  : rbProfile.deepLink(dlParams),
-          goal : buildBusGoal(p) + buildSelectorHints(rbProfile),
+          url: rbProfile.deepLink(dlParams),
+          goal: buildBusGoal(p) + buildSelectorHints(rbProfile),
         })
       }
-      // AbhiBus — no siteConfig entry yet; use homepage with search context in goal
-      targets.push({
-        label: 'AbhiBus',
-        url  : `https://www.abhibus.com/bus_search/${encodeURIComponent(p.from)}/${encodeURIComponent(p.to)}/${p.date}/1/S`,
-        goal : buildBusGoal(p),
-      })
       return targets
     }
 
     case 'hotels': {
-      const bProfile = SITE_CONFIG['booking.com']
       const targets: TaskTarget[] = []
+      // Primary: Agoda (Bot-friendly)
+      targets.push({
+        label: 'Agoda',
+        url: `https://www.agoda.com/search?city=${encodeURIComponent(p.to)}&checkIn=${p.date}&sort=price`,
+        goal: buildHotelGoal(p),
+      })
+      // Secondary: Booking.com
+      const bProfile = SITE_CONFIG['booking.com']
       if (bProfile) {
         targets.push({
           label: 'Booking.com',
-          url  : bProfile.deepLink(dlParams),
-          goal : buildHotelGoal(p) + buildSelectorHints(bProfile),
+          url: bProfile.deepLink(dlParams),
+          goal: buildHotelGoal(p) + buildSelectorHints(bProfile),
         })
       }
-      // Agoda fallback
-      targets.push({
-        label: 'Agoda',
-        url  : `https://www.agoda.com/search?city=${encodeURIComponent(p.to)}&checkIn=${p.date}`,
-        goal : buildHotelGoal(p),
-      })
       return targets
     }
 
     case 'trains': {
       const targets: TaskTarget[] = []
-      // Primary: Ixigo
+      // Primary: Cleartrip (Bot-friendly)
       targets.push({
-        label: 'ixigo',
-        url  : `https://www.ixigo.com/trains`,
-        goal : buildTrainGoal(p),
+        label: 'Cleartrip',
+        url: `https://www.cleartrip.com/trains`,
+        goal: buildTrainGoal(p),
       })
       // Fallback: ConfirmTkt
       targets.push({
         label: 'ConfirmTkt',
-        url  : `https://www.confirmtkt.com/rly-search?fromCode=${encodeURIComponent(p.from)}&toCode=${encodeURIComponent(p.to)}&date=${p.date}`,
-        goal : buildTrainGoal(p),
+        url: `https://www.confirmtkt.com/rly-search?fromCode=${encodeURIComponent(p.from)}&toCode=${encodeURIComponent(p.to)}&date=${p.date}`,
+        goal: buildTrainGoal(p),
       })
       return targets
     }
@@ -203,8 +206,11 @@ function buildTargets(p: SearchParams): TaskTarget[] {
 
 // ─── Universal Extraction Rules ──────────────────────────────────────────────
 
+const GUARDRAIL = "If the website does not load within 25 seconds or shows a CAPTCHA/Bot-detection screen, STOP immediately and return an empty array or partial data. Do not stay stuck on a blocked page.";
+
 const UNIVERSAL_RULES = `
 ### UNIVERSAL CHEAPEST PRICE SNIPER RULES:
+0. **CRITICAL GUARDRAIL**: ${GUARDRAIL}
 1. **The Sniper Goal**: Your primary and ONLY goal is to find the SINGLE ABSOLUTE CHEAPEST deal on the entire page. Do not extract multiple results. Find the one with the lowest total price.
 2. **Sort First**: If there is a 'Sort by Price', 'Lowest Price', or 'Cheapest' button/filter, you MUST click it first before extracting any data.
 3. **Currency Intelligence (CRITICAL)**: You MUST identify the currency symbol of the price (e.g., $, ₹, £, €, AED). Return the price as a string including the symbol (e.g., "$75" or "₹4500"). Do NOT return just numbers.
