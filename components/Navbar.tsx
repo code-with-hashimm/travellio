@@ -3,28 +3,30 @@
 import { motion } from "framer-motion";
 import { Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const navLinks = ["How It Works", "Live Demo", "Tech Stack", "Team"];
 
-export function Navbar() {
+export function Navbar({ bannerVisible }: { bannerVisible?: boolean }) {
   const router = useRouter();
   return (
     <motion.nav
       initial={{ opacity: 0, y: -40 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ 
+        opacity: 1, 
+        y: 0,
+        top: bannerVisible ? "3.5rem" : "1.5rem"
+      }}
       transition={{ duration: 0.6, delay: 0.2, ease: [0.12, 0.23, 0.5, 1] }}
-      className="fixed inset-x-0 top-6 z-50 flex justify-center px-4"
+      className="fixed inset-x-0 z-50 flex justify-center px-4 transition-[top] duration-500"
     >
       <div className="flex w-full max-w-5xl items-center justify-between gap-4 rounded-navpill border border-white/10 bg-black/40 px-4 py-2 text-sm text-white shadow-lg backdrop-blur-md">
-        <div className="flex items-center gap-2 font-display text-lg tracking-tight">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-teal text-xs font-semibold">
-            TD
+        <Link href="/" className="group flex items-center gap-2 font-display text-lg">
+          <span className="font-semibold uppercase tracking-[0.15em] text-slate-100 transition-colors group-hover:text-accent-cyan">
+            Travellio
+            <span className="text-teal">.</span>
           </span>
-          <span>Travel Deal Hunter</span>
-          <span className="ml-1 inline-flex items-center rounded-md bg-accent-cyan/20 px-1.5 py-0.5 text-[10px] font-bold text-accent-cyan">
-            AI
-          </span>
-        </div>
+        </Link>
 
         <div className="hidden flex-1 items-center justify-center gap-6 text-xs font-medium text-white/80 md:flex">
           {navLinks.map((link) => (

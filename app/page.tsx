@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { HackathonBanner } from "@/components/HackathonBanner";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
@@ -18,10 +21,17 @@ import { Stories } from "@/components/Stories";
 import { Footer } from "@/components/Footer";
 
 export default function Page() {
+  const [bannerVisible, setBannerVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setBannerVisible(false), 8000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <main className="min-h-screen bg-black text-white">
-      <HackathonBanner />
-      <Navbar />
+      <HackathonBanner visible={bannerVisible} onClose={() => setBannerVisible(false)} />
+      <Navbar bannerVisible={bannerVisible} />
       <Hero />
       <ProblemStatement />
       <HowItWorks />
